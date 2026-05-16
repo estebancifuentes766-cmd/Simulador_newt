@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Leyes de Newton</title>
+  <style>
+    /* =========================================================
+       VARIABLES GLOBALES Y TEMAS
+    ========================================================== */
+    :root {
+      --bg: #0f172a;
+      --bg-secondary: #111827;
+      --card: rgba(17, 24, 39, 0.75);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --primary: #38bdf8;
+      --primary-strong: #0ea5e9;
+      --accent: #22d3ee;
+      --success: #10b981;
+      --danger: #ef4444;
+      --border: rgba(255,255,255,0.12);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --glow: 0 0 12px rgba(34, 211, 238, 0.55);
+    }
+
+    body.light {
+      --bg: #f1f5f9;
+      --bg-secondary: #ffffff;
+      --card: rgba(255,255,255,0.8);
+      --text: #0f172a;
+      --muted: #475569;
+      --primary: #0284c7;
+      --primary-strong: #0369a1;
+      --accent: #0891b2;
+      --success: #059669;
+      --danger: #dc2626;
+      --border: rgba(15,23,42,0.1);
+      --shadow: 0 12px 24px rgba(15,23,42,0.12);
+      --glow: 0 0 12px rgba(8,145,178,0.25);
+    }
+
+    /* =========================================================
+       ESTILOS GENERALES
+    ========================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bg), #020617);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.4s ease, color 0.4s ease;
+      overflow-x: hidden;
+    }
+
+    body.light {
+      background: linear-gradient(135deg, #dbeafe, #f8fafc);
+    }
+
+    .container {
+      width: min(1200px, 92%);
+      margin: auto;
+      padding: 30px 0 60px;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .title-box {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .title-box h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.1;
+    }
+
+    .title-box p {
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .theme-toggle {
+      border: none;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 12px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: var(--glow);
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    /* =========================================================
+       TARJETAS
+    ========================================================== */
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* =========================================================
+       FORMULARIO
+    ========================================================== */
+    .calculator h2,
+    .education h2,
+    .diagram-card h2 {
+      margin-bottom: 18px;
+      color: var(--primary);
+    }
+
+    .formula-highlight {
+      margin-bottom: 24px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      outline: none;
+      transition: border 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+      font-size: 1rem;
+    }
+
+    body.light select,
+    body.light input {
+      background: rgba(255,255,255,0.9);
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: var(--glow);
+      transform: scale(1.01);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button.action {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.25s ease;
+    }
+
+    .calculate {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: var(--glow);
+    }
+
+    .clear {
+      background: transparent;
+      border: 1px solid var(--border) !important;
+      color: var(--text);
+    }
+
+    button.action:hover {
+      transform: translateY(-2px);
+    }
+
+    /* =========================================================
+       RESULTADOS
+    ========================================================== */
+    .result-box {
+      margin-top: 24px;
+      border-radius: 18px;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.35);
+      border: 1px solid var(--border);
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    body.light .result-box {
+      background: rgba(255,255,255,0.65);
+    }
+
+    .result-box h3 {
+      margin-bottom: 10px;
+      color: var(--success);
+    }
+
+    .result {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: var(--accent);
+    }
+
+    .formula-used {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--text);
+    }
+
+    .error {
+      margin-top: 18px;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fecaca;
+      padding: 14px;
+      border-radius: 14px;
+      display: none;
+      animation: shake 0.3s ease;
+    }
+
+    body.light .error {
+      color: #991b1b;
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    /* =========================================================
+       DIAGRAMA SVG
+    ========================================================== */
+    .diagram-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    svg {
+      width: 100%;
+      max-width: 380px;
+      overflow: visible;
+    }
+
+    .box {
+      animation: moveBox 2.5s infinite ease-in-out alternate;
+    }
+
+    @keyframes moveBox {
+      from {
+        transform: translateX(0px);
+      }
+      to {
+        transform: translateX(38px);
+      }
+    }
+
+    .force-arrow {
+      animation: pulseArrow 1.5s infinite;
+      transform-origin: center;
+    }
+
+    @keyframes pulseArrow {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* =========================================================
+       SECCIÓN EDUCATIVA
+    ========================================================== */
+    .education {
+      margin-top: 30px;
+    }
+
+    .law {
+      margin-bottom: 24px;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      transition: transform 0.25s ease, border 0.25s ease;
+    }
+
+    .law:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56,189,248,0.4);
+    }
+
+    .law h3 {
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    .law p,
+    .law li {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 20px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 22px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .result {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- =====================================================
+         ENCABEZADO PRINCIPAL
+    ====================================================== -->
+    <header>
+      <div class="title-box">
+        <!-- Icono SVG científico -->
+        <svg width="70" height="70" viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="44" stroke="#38bdf8" stroke-width="5" opacity="0.8" />
+          <path d="M20 55 Q50 15 80 55" stroke="#22d3ee" stroke-width="5" fill="none" />
+          <circle cx="50" cy="50" r="10" fill="#38bdf8">
+            <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+
+        <div>
+          <h1>Calculadora de Leyes de Newton</h1>
+          <p>Aplicación educativa interactiva basada en la Segunda Ley de Newton.</p>
+        </div>
+      </div>
+
+      <button class="theme-toggle" id="themeToggle">🌙 Modo Oscuro</button>
+    </header>
+
+    <!-- =====================================================
+         GRID PRINCIPAL
+    ====================================================== -->
+    <div class="grid">
+
+      <!-- ===================================================
+           CALCULADORA
+      ==================================================== -->
+      <section class="card calculator">
+        <h2>⚙️ Calculadora Física</h2>
+
+        <div class="formula-highlight">
+          F = m × a
+        </div>
+
+        <div class="input-group">
+          <label for="calculationType">¿Qué deseas calcular?</label>
+          <select id="calculationType">
+            <option value="force">Fuerza (F)</option>
+            <option value="mass">Masa (m)</option>
+            <option value="acceleration">Aceleración (a)</option>
+          </select>
+        </div>
+
+        <!-- Inputs dinámicos -->
+        <div id="dynamicInputs"></div>
+
+        <div class="button-group">
+          <button class="action calculate" id="calculateBtn">Calcular</button>
+          <button class="action clear" id="clearBtn">Limpiar</button>
+        </div>
+
+        <!-- Error -->
+        <div class="error" id="errorBox"></div>
+
+        <!-- Resultado -->
+        <div class="result-box" id="resultBox">
+          <h3>Resultado</h3>
+          <div class="result" id="resultText"></div>
+          <div class="formula-used" id="formulaText"></div>
+          <p id="explanationText" style="margin-top: 14px; line-height: 1.7;"></p>
+        </div>
+      </section>
+
+      <!-- ===================================================
+           DIAGRAMA VISUAL SVG
+      ==================================================== -->
+      <section class="card diagram-card">
+        <h2>🚀 Movimiento y Fuerza</h2>
+        <p style="color: var(--muted); line-height: 1.7; margin-bottom: 18px;">
+          El siguiente diagrama muestra cómo una fuerza aplicada produce aceleración sobre un objeto.
+        </p>
+
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 500 220">
+            <!-- Piso -->
+            <line x1="40" y1="170" x2="460" y2="170" stroke="#64748b" stroke-width="5" />
+
+            <!-- Flecha de fuerza -->
+            <g class="force-arrow">
+              <line x1="70" y1="90" x2="200" y2="90" stroke="#22d3ee" stroke-width="8" />
+              <polygon points="200,90 175,75 175,105" fill="#22d3ee" />
+            </g>
+
+            <!-- Caja en movimiento -->
+            <g class="box">
+              <rect x="190" y="110" width="110" height="60" rx="10" fill="#38bdf8" />
+              <text x="245" y="147" fill="white" text-anchor="middle" font-size="28">m</text>
+            </g>
+
+            <!-- Etiquetas -->
+            <text x="105" y="70" fill="#22d3ee" font-size="24">Fuerza</text>
+            <text x="360" y="110" fill="#f8fafc" font-size="24">→ a</text>
+          </svg>
+        </div>
+
+        <div style="margin-top: 24px; color: var(--muted); line-height: 1.7;">
+          <strong style="color: var(--primary);">Segunda Ley de Newton:</strong>
+          La aceleración de un objeto es directamente proporcional a la fuerza neta aplicada e inversamente proporcional a su masa.
+        </div>
+      </section>
+    </div>
+
+    <!-- =====================================================
+         SECCIÓN EDUCATIVA
+    ====================================================== -->
+    <section class="card education">
+      <h2>📘 Aprende las 3 Leyes de Newton</h2>
+
+      <div class="law">
+        <h3>1️⃣ Primera Ley de Newton — Ley de la Inercia</h3>
+        <p>
+          Un objeto permanecerá en reposo o en movimiento rectilíneo uniforme a menos que una fuerza externa actúe sobre él.
+        </p>
+        <ul>
+          <li>Un libro sobre una mesa permanece quieto hasta que alguien lo mueve.</li>
+          <li>Un automóvil sigue avanzando si no se aplican frenos.</li>
+        </ul>
+      </div>
+
+      <div class="law">
+        <h3>2️⃣ Segunda Ley de Newton — Fuerza y Aceleración</h3>
+        <p>
+          La fuerza neta aplicada sobre un cuerpo produce una aceleración proporcional a dicha fuerza.
+        </p>
+        <ul>
+          <li>Empujar un carrito vacío requiere menos fuerza que uno lleno.</li>
+          <li>Un cohete acelera al expulsar gases a gran velocidad.</li>
+        </ul>
+      </div>
+
+      <div class="law">
+        <h3>3️⃣ Tercera Ley de Newton — Acción y Reacción</h3>
+        <p>
+          Toda acción produce una reacción igual y opuesta.
+        </p>
+        <ul>
+          <li>Cuando caminas, empujas el suelo hacia atrás y el suelo te impulsa hacia adelante.</li>
+          <li>El retroceso de un arma ocurre por la fuerza opuesta al disparo.</li>
+        </ul>
+      </div>
+
+      <div class="law">
+        <h3>🌍 Aplicaciones en la Vida Real</h3>
+        <ul>
+          <li>Diseño de automóviles y sistemas de seguridad.</li>
+          <li>Ingeniería aeroespacial y lanzamiento de satélites.</li>
+          <li>Deportes: cálculo de fuerza, velocidad y movimiento.</li>
+          <li>Robótica y automatización industrial.</li>
+          <li>Simulaciones físicas en videojuegos.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // =========================================================
+    // ELEMENTOS DEL DOM
+    // =========================================================
+    const calculationType = document.getElementById("calculationType");
+    const dynamicInputs = document.getElementById("dynamicInputs");
+    const calculateBtn = document.getElementById("calculateBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const resultBox = document.getElementById("resultBox");
+    const resultText = document.getElementById("resultText");
+    const formulaText = document.getElementById("formulaText");
+    const explanationText = document.getElementById("explanationText");
+    const errorBox = document.getElementById("errorBox");
+    const themeToggle = document.getElementById("themeToggle");
+
+    // =========================================================
+    // CAMBIO DE TEMA CLARO/OSCURO
+    // =========================================================
+    themeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("light");
+
+      if (document.body.classList.contains("light")) {
+        themeToggle.textContent = "☀️ Modo Claro";
+      } else {
+        themeToggle.textContent = "🌙 Modo Oscuro";
+      }
+    });
+
+    // =========================================================
+    // CREACIÓN DINÁMICA DE INPUTS
+    // =========================================================
+    function renderInputs() {
+      const type = calculationType.value;
+
+      let html = "";
+
+      if (type === "force") {
+        html = `
+          <div class="input-group">
+            <label>Masa (kg)</label>
+            <input type="number" id="mass" placeholder="Ej: 10" min="0" step="any">
+          </div>
+          <div class="input-group">
+            <label>Aceleración (m/s²)</label>
+            <input type="number" id="acceleration" placeholder="Ej: 5" step="any">
+          </div>
+        `;
+      }
+
+      if (type === "mass") {
+        html = `
+          <div class="input-group">
+            <label>Fuerza (N)</label>
+            <input type="number" id="force" placeholder="Ej: 50" min="0" step="any">
+          </div>
+          <div class="input-group">
+            <label>Aceleración (m/s²)</label>
+            <input type="number" id="acceleration" placeholder="Ej: 5" step="any">
+          </div>
+        `;
+      }
+
+      if (type === "acceleration") {
+        html = `
+          <div class="input-group">
+            <label>Fuerza (N)</label>
+            <input type="number" id="force" placeholder="Ej: 50" min="0" step="any">
+          </div>
+          <div class="input-group">
+            <label>Masa (kg)</label>
+            <input type="number" id="mass" placeholder="Ej: 10" min="0.0001" step="any">
+          </div>
+        `;
+      }
+
+      dynamicInputs.innerHTML = html;
+    }
+
+    // =========================================================
+    // MOSTRAR ERRORES
+    // =========================================================
+    function showError(message) {
+      errorBox.style.display = "block";
+      errorBox.textContent = message;
+      resultBox.style.display = "none";
+    }
+
+    function hideError() {
+      errorBox.style.display = "none";
+    }
+
+    // =========================================================
+    // VALIDACIÓN DE DATOS
+    // =========================================================
+    function validateInputs(values) {
+      for (const key in values) {
+        if (values[key] === "" || values[key] === null || isNaN(values[key])) {
+          showError("⚠️ Por favor completa todos los campos correctamente.");
+          return false;
+        }
+      }
+
+      // Validaciones físicas
+      if (values.mass !== undefined && values.mass <= 0) {
+        showError("⚠️ La masa debe ser mayor que cero.");
+        return false;
+      }
+
+      if (values.force !== undefined && values.force < 0) {
+        showError("⚠️ La fuerza no puede ser negativa.");
+        return false;
+      }
+
+      hideError();
+      return true;
+    }
+
+    // =========================================================
+    // CALCULADORA PRINCIPAL
+    // =========================================================
+    function calculate() {
+      const type = calculationType.value;
+
+      let result = 0;
+      let formula = "";
+      let explanation = "";
+
+      // Calcular fuerza
+      if (type === "force") {
+        const mass = parseFloat(document.getElementById("mass").value);
+        const acceleration = parseFloat(document.getElementById("acceleration").value);
+
+        if (!validateInputs({ mass, acceleration })) return;
+
+        result = mass * acceleration;
+        formula = `F = m × a = ${mass} × ${acceleration}`;
+        explanation = `La fuerza se obtuvo multiplicando la masa del objeto por su aceleración. Un objeto de ${mass} kg acelerando a ${acceleration} m/s² genera una fuerza de ${result.toFixed(2)} Newtons.`;
+
+        resultText.textContent = `${result.toFixed(2)} N`;
+      }
+
+      // Calcular masa
+      if (type === "mass") {
+        const force = parseFloat(document.getElementById("force").value);
+        const acceleration = parseFloat(document.getElementById("acceleration").value);
+
+        if (!validateInputs({ force, acceleration })) return;
+
+        if (acceleration === 0) {
+          showError("⚠️ La aceleración no puede ser cero para calcular la masa.");
+          return;
+        }
+
+        result = force / acceleration;
+        formula = `m = F ÷ a = ${force} ÷ ${acceleration}`;
+        explanation = `La masa se calculó dividiendo la fuerza aplicada entre la aceleración producida.`;
+
+        resultText.textContent = `${result.toFixed(2)} kg`;
+      }
+
+      // Calcular aceleración
+      if (type === "acceleration") {
+        const force = parseFloat(document.getElementById("force").value);
+        const mass = parseFloat(document.getElementById("mass").value);
+
+        if (!validateInputs({ force, mass })) return;
+
+        result = force / mass;
+        formula = `a = F ÷ m = ${force} ÷ ${mass}`;
+        explanation = `La aceleración se obtuvo al dividir la fuerza aplicada entre la masa del objeto.`;
+
+        resultText.textContent = `${result.toFixed(2)} m/s²`;
+      }
+
+      formulaText.innerHTML = `<strong>Fórmula utilizada:</strong> ${formula}`;
+      explanationText.textContent = explanation;
+      resultBox.style.display = "block";
+    }
+
+    // =========================================================
+    // LIMPIAR CAMPOS
+    // =========================================================
+    function clearFields() {
+      renderInputs();
+      hideError();
+      resultBox.style.display = "none";
+    }
+
+    // =========================================================
+    // EVENTOS
+    // =========================================================
+    calculationType.addEventListener("change", renderInputs);
+    calculateBtn.addEventListener("click", calculate);
+    clearBtn.addEventListener("click", clearFields);
+
+    // Render inicial
+    renderInputs();
+  </script>
+</body>
+</html>
